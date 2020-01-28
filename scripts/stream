@@ -1,13 +1,19 @@
 #!/bin/bash
 match=0
 
-echo "$1" >> logs/video-history.log
+if [[ "$1" == "Yes" ]]; then
+    FILTER="-vf edgedetect,colorchannelmixer=0:0:0:0:1:1:1:0:0:0:0:0"
+else
+    FILTER=""
+fi
+
+echo "$2" >> logs/video-history.log
 
 # Fix up missing protocols
-if [[ "$1" == https://* ]] || [[ "$1" == http://* ]] || [[ "$1" == rtsp://* ]]; then
-	VIDEO="$1"
+if [[ "$2" == https://* ]] || [[ "$2" == http://* ]] || [[ "$2" == rtsp://* ]]; then
+	VIDEO="$2"
 else
-	VIDEO="https://$1"
+	VIDEO="https://$2"
 fi
 
 while read line; do
@@ -24,5 +30,5 @@ fi
 
 xecho -no-stdin -fc red -bc black -maxsize 100 "Please wait..." &
 VIDEO=$(~/youtube-dl/youtube-dl -g -f best "$VIDEO")
-mpv --input-file=control/$LOCATION-mpv --include=config/mpv/$LOCATION "$VIDEO"
+mpv --input-file=control/$LOCATION-mpv --include=config/mpv/$LOCATION $FILTER "$VIDEO"
 kill $(jobs -p)
